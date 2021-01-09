@@ -1,0 +1,15 @@
+version: "2"
+services:
+  client-1:
+    hostname: client-1
+    image: henriqueccapozzi/anpbits:client-1.0.0
+
+  client-2:
+    hostname: client-2
+    image: henriqueccapozzi/anpbits:client-1.0.0
+
+  controller:
+    hostname: controller
+    image: henriqueccapozzi/anpbits:controller-1.0.0
+    command: tail -f /dev/null
+      
