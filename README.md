@@ -51,7 +51,7 @@ Lets break it down a little more.
 *-a name=openssh-clients* | ansible **module argument** name=value
 
 <br>
-Test your ssh access, when prompted for 
+Test your ssh access
 
 ```bash
 [root@controller /]$ ssh student@client-1
@@ -65,3 +65,6 @@ student@client-1's password:"
 anpbits
 [student@client-1 ~]$
 ```
+Congratulations!
+
+Now let's start with the good stuf 
