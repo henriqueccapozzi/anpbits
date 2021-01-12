@@ -1,11 +1,17 @@
-# anpbits - Hands on ansible
+# anpbits - Ansible na prática
+
+[English version](README_en.md)
+<br>
+<br>
+
+## Começando do jeito fácil. (É necessário ter conexão com a internet)
 
 
-## Setting up the easy way. (Requires internet connection)
+- Acesse a página [Docker Playground](https://labs.play-with-docker.com)
 
-- Navigate to [Docker Playground](https://labs.play-with-docker.com)
+- Faça login com sua conta Docker. Ou crie uma se você ainda não tiver.
 
-- Download the docker-compose and run docker-compose up
+- Faça o download do arquivo docker-compose.yml and run docker-compose up
     
     ``` bash
     DOCKER_COMPOSE_URL='https://raw.githubusercontent.com/henriqueccapozzi/anpbits/main/docker-compose.yml'
@@ -14,44 +20,37 @@
     docker-compose up -d
     ```
 
+## Lesson 1 - Primeiro comando ansible
+O Ansible usa conexões SSH para muitos de seus modulos. Mas nossa maquina que ira rodar o ansible não tem SSH instalado. 
 
-## Setting up locally. (Work in progress, just go the easy way for now)
-- Make sure you have docker-compose installed. In case you don't have it yet please refer to the [official documentation](https://docs.docker.com/compose/install/)  
+Bom, vamos usar o ansible para nos ajudar com isso
 
-
-<br>
----
----
-<br>
-<br>
-
-## Lesson 1 - Your first ansible command
-Ansible uses in most cases ssh to manage remote hosts, but seems like our controller node does not have ssh installed.
-
-Well lets run our first ansible commands to help up set up ansible =)
-
-First **attach** to the container with
+Primeiro precisamos nos 'conectar' com o container usando o comando abaixo
 
 ```bash
 CONTROLLER_ID=$(docker ps | grep 'controller' | awk '{print $1}')
 docker exec -it ${CONTROLLER_ID} bash
 ```
 
-Then, run the following command
+Depois disso vamos usar um comando ansible no modo **adhoc** para instalar um pacote usando o 
+modulo 'yum'
+
 ```bash
 ansible localhost -m 'ansible.builtin.yum' -a 'name=openssh-clients' -v
 ```
-Lets break it down a little more.
+Vamos detalhar um pouco o que acabamos de fazer
 
-| Command | Explanation |
+| Commando | Explicação |
 | --- | --- |
-*ansible* |  Well, there's not much to say about that one
-*localhost* | the ansible command **target host**
-*-m ansible.builtin.yum* | ansible **module** name
-*-a name=openssh-clients* | ansible **module argument** name=value
+*ansible* |  Bom, dispensa comentários
+*localhost* | **alvos** para o comando 'ansible'
+*-m ansible.builtin.yum* | Nome do **modulo** ansible
+*-a name=openssh-clients* | **argumento para o module** nome=valor
 
 <br>
-Test your ssh access
+Teste o acesso SSH
+<br>
+<br>
 
 ```bash
 [root@controller /]$ ssh student@client-1
@@ -65,6 +64,6 @@ student@client-1's password:"
 anpbits
 [student@client-1 ~]$
 ```
-Congratulations!
+Parabens!
 
-Now let's start with the good stuf 
+Agora vamos começar a parte boa
