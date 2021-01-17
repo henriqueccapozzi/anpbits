@@ -70,3 +70,49 @@ anpbits
 Congratulations!
 
 Now let's start with the good stuff 
+
+
+
+## <a id="l2"></a> Lesson 2 - Adding hosts to our inventory
+
+The standard way that ansible works is executing actions agains 1 or more **targets**
+In the previous lesson we used **localhost** as the target for our command, but even though is very usefull to automate our ansible controller, the greatest
+value is in automating things on other servers or networking equipment.
+
+In order to get that to work, we need to use an [inventory](#inventory), to simplify the learning processes, we'll create one in the default path 
+that Ansible looks for one which is '/etc/ansible/hosts'
+
+```bash
+# On real life things will not always be ready the way you would expect ;-)
+mkdir -p /etc/ansible
+
+echo 'client-1' >> /etc/ansible/hosts
+echo 'client-2' >> /etc/ansible/hosts
+```
+
+Apart from the inventory let's add a couple of configurations
+parameters so that the output of our commands are more friendly.
+
+```bash
+export ANSIBLE_PYTHON_INTERPRETER=/usr/libexec/platform-python
+export ANSIBLE_HOST_KEY_CHECKING=false
+```
+
+Now that's out of our way, let's run another ansible command
+```bash
+ansible all -m ansible.builtin.shell -a 'echo Hello from $(hostname)' -u student -k
+# when prompted for a password enter ===> anpbits
+```
+
+We added new command line parameters, and that's what they mean
+
+| Parameter | Explanation |
+| --- | --- |
+*-u student* |  Tell ansible which user to use for the ssh connection against it's **targets**
+*-k* | prompt's for the ssh user password
+*-m ansible.builtin.shell* | Ansible **module** name
+*-a 'echo Hello from $(hostname)'* | **module argument** which in this case does not have a name like the one used previously
+
+<br>
+<br>
+
