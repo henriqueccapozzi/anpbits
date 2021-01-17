@@ -4,3 +4,4 @@ RUN \
     yum --enablerepo=extras install --nogpgcheck -y epel-release && \
     yum install --nogpgcheck -y python3 sshpass && \
     pip3 install ansible paramiko
+COPY ./setmeup /setmeup
