@@ -2,7 +2,7 @@ FROM centos:8
 
 RUN yum install -y \
     --nogpgcheck \
-    openssh-server
+    openssh-server sudo
 
 RUN echo "==> Setting up sshd" && \
     ssh-keygen -A && \
@@ -10,6 +10,7 @@ RUN echo "==> Setting up sshd" && \
     rm -f /run/nologin && \
     echo "==> Creating users and setting passwords" && \
     useradd student && \
+    echo 'student ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/student && \
     echo 'student:anpbits' | chpasswd && \
     echo 'root:anpbits' | chpasswd && \
     echo "==> Creating entrypoint.sh" && \
