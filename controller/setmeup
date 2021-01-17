@@ -1,0 +1,74 @@
+#!/usr/bin/python3
+
+import argparse
+import subprocess
+import os
+from shlex import shlex
+
+
+def print_lesson_setup(lesson_id: int):
+    result_msg = {
+        1: "openssh-clients installed on controller",
+        3: "python3 installed on clients",
+    }
+    print("{:40} --- {:6}".format(
+        result_msg[lesson_id],
+        '\x1b[1;32;40m' + 'Success!' + '\x1b[0m'
+    ))
+
+
+def get_user_args():
+    parser = argparse.ArgumentParser()
+    # TODO parse the README.md for available lessons
+    parser.add_argument('lesson', type=int, choices=range(1, 10))
+
+    args = parser.parse_args()
+    return args
+
+
+def run_local_command(command):
+    shell_format_command_list = list(shlex(command, punctuation_chars=True))
+    command_result = subprocess.run(
+        shell_format_command_list, stdout=subprocess.PIPE)
+    if (command_result.returncode != 0):
+        print(command_result)
+        raise RuntimeError('Unexpected error running the command:\n{}'.format(
+            command))
+    return command_result
+
+
+def update_controller_to_lesson(lesson_id: int):
+    # Install openssh client
+    run_local_command(
+        f"ansible localhost -m ansible.builtin.yum -a name=openssh-clients -v")
+    print('Setup summary')
+    print_lesson_setup(1)
+
+    if lesson_id < 2:
+        return None
+
+    # Create inventory
+    run_local_command(f"mkdir -p /etc/ansible")
+    with open('/etc/ansible/hosts', 'w') as f:
+        f.writelines([
+            'client-1\n',
+            'client-2\n',
+        ])
+    if lesson_id < 3:
+        return None
+
+    # Install python3 on clients
+    os.putenv('ANSIBLE_HOST_KEY_CHECKING', 'false')
+    os.putenv('ANSIBLE_PYTHON_INTERPRETER', '/usr/libexec/platform-python')
+    run_local_command(
+        f"ansible all -vv -m ansible.builtin.dnf -a name=python38 -u student -e ansible_ssh_password=anpbits --become")
+    print_lesson_setup(3)
+
+
+def main():
+    user_arguments = get_user_args()
+    update_controller_to_lesson(user_arguments.lesson)
+
+
+if __name__ == "__main__":
+    main()
