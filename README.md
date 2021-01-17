@@ -24,8 +24,9 @@
 
 - [Lição 1 - Primeiro comando ansible](#l1)
 
-- [Lição 2 - Adicionando nossos primeiros hosts](#l2)
+- [Lição 2 - Adicionando nossos primeiros hosts ao inventario](#l2)
 
+- [Lição 3 - Instalando o python nos nossos alvos](#l3)
 
 <br>
 <br>
@@ -81,8 +82,11 @@ Parabens!
 
 Agora vamos começar a parte boa
 
+<br>
+<br>
 
-## <a id="l2"></a> Lição 2 - Adicionando nossos primeiros hosts
+
+## <a id="l2"></a> Lição 2 - Adicionando nossos primeiros hosts ao inventario
 
 A forma padrão de trabalho do Ansible é de executar ações contra 1 ou mais **alvos**
 Na lição passada usamos **localhost** como o alvo do nosso comando, mas apesar de 
@@ -121,9 +125,60 @@ Nesse comando temos a adição de novos parâmetros de linha de comando
 *-m ansible.builtin.shell* | Nome do **modulo** ansible
 *-a 'echo Ola do $(hostname)'* | **argumento para o módulo** neste caso o módulo nao tem parâmetros nominais como o usado anteriormente
 
+<br>
+<br>
+
+
+
+## <a id="l3"></a> Lição 3 - Instalando o python nos nossos alvos
+
+Python é a linguagem nativa do Ansible, e grande parte de sua funcionalidade é através do uso de bibliotecas python.
+Como nossos 'clientes' simulam uma instalação minima de um sistema centos8 (usando containers), somente uma pequena parte do python esta disponível neles.
+
+Vamos usar o ansible para já deixar nossos clientes 'preparados' para as próximas etapas.
+
+```bash
+# Se você não completou a lição 2 agora, faça os preparativos abaixo primeiro
+mkdir -p /etc/ansible
+
+echo 'client-1' >> /etc/ansible/hosts
+echo 'client-2' >> /etc/ansible/hosts
+export ANSIBLE_PYTHON_INTERPRETER=/usr/libexec/platform-python
+export ANSIBLE_HOST_KEY_CHECKING=false
+
+# -------------------------------
+# Se você já exportou as variaveis anteriormente, contunie daqui
+# -------------------------------
+ansible all -m ansible.builtin.dnf -a 'name=python38' -u student -k --become
+# Lembrando que a senha é ==> anpbits
+```
+
+
+Nesse comando a nossa única novidade é o parametro de linha de comando '--become'
+que é usado no ansible para executar comandos no modo privilegiado
+
+
 
 <br>
 <br>
+
+## <a id="l4"></a> Lição 4 - Executando nosso primeiro playbook
+
+Até agora executamos comandos 'ansible', que são chamados **comandos adhoc**
+eles são relativamente simples de usar, porem é fácil de ver que para casos complexos o comando ficaria bem difícil de trabalhar.
+
+Os comandos adhoc são geralmente usados para tarefas pontuais, ou para o que fizemos nas lições de 1 a 3, que foi preparar a infra estrutura necessária para
+o que vem pela frente.
+
+### O comando: ansible-playbook
+
+A melhor forma de aproveitar o poder do ansible é usando [playbooks](#playbook)
+
+Um playbook é um arquivo no formato [yaml](https://yaml.org), que especifica o que o ansible deve fazer ao interagir com cada um dos seus alvos
+
+```bash
+```
+
 <br>
 
 
@@ -132,3 +187,4 @@ Nesse comando temos a adição de novos parâmetros de linha de comando
 #### inventario
 #### controller
 #### alvo
+#### playbook

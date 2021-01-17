@@ -2,11 +2,11 @@ version: "2"
 services:
   client-1:
     hostname: client-1
-    image: henriqueccapozzi/anpbits:client-1.0.0
+    image: henriqueccapozzi/anpbits:client-1.0.1
 
   client-2:
     hostname: client-2
-    image: henriqueccapozzi/anpbits:client-1.0.0
+    image: henriqueccapozzi/anpbits:client-1.0.1
 
   controller:
     hostname: controller
