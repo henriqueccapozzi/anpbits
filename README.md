@@ -42,7 +42,7 @@ Bom, vamos usar o ansible para nos ajudar com isso
 Primeiro precisamos nos 'conectar' com o container usando o comando abaixo
 
 ```bash
-CONTROLLER_ID=$(docker ps | grep 'controller' | awk '{print $1}')
+CONTROLLER_ID=$(docker ps | grep 'controller' | awk '{print $1}')  
 docker exec -it ${CONTROLLER_ID} bash
 ```
 
@@ -93,7 +93,7 @@ Na lição passada usamos **localhost** como o alvo do nosso comando, mas apesar
 ser de grande utilidade automatizar processos no controller do ansible, o grande valor
 está em automatizar outros servidores.
 
-Para isso vamos precisar usar um [inventario](#inventario), e para simplificar o aprendizado, vamos criar um no local onde o Ansible vai procurar por padrão.
+Para isso vamos precisar usar um [inventario](#inventario), e para simplificar o aprendizado, vamos criar um no local onde o Ansible vai procurar por padrão. Que é '/etc/ansible/hosts'
 
 ```bash
 # Na vida real as coisas não estaram sempre prontas ;-)
