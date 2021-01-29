@@ -176,11 +176,80 @@ A melhor forma de aproveitar o poder do ansible é usando [playbooks](#playbook)
 
 Um playbook é um arquivo no formato [yaml](https://yaml.org), que especifica o que o ansible deve fazer ao interagir com cada um dos seus alvos
 
+Vamos fazer um playbook para configurar a mensagem de boas vindas quando um usuário fizer login usando ssh
+
+Vamos criar um diretorio para trabalho
 ```bash
+mkdir anpbits && cd anpbits
+```
+```yaml
+# Conteudo do arquivo /anpbits/site.yml
+- hosts: all
+  tasks:
+  - copy:
+      content: "Ansible Rocks!!!\n"
+      dest: /etc/motd
+```
+```bash
+# Vamos executar nosso playbook
+ansible-playbook site.yml -v -u student -k --become
+# Lembrando que a senha é ==> anpbits
 ```
 
-<br>
+![alt saida do comando acima](images/l4-site-playbook-output.png "Saida do comando")
 
+Mas espera, se olharmos o resultado da execução podemos ver que temos as seguintes seções:
+
+- PLAY [all]
+- TASK [Gathering Facts]
+- TASK [copy]
+- PLAY RECAP
+
+Seguindo o que fizemos nas lições anteriores, vamos olhar mais de perto cada parte:
+
+| Segmento | Explicação |
+| --- | --- |
+| **PLAY** [all] | Demarca o inicio do playbook
+| PLAY **[all]** | Nome do playbook (se existir), ou nome dos **alvos** 
+| --- | --- |
+| **TASK** [Gathering Facts] | Demarca o inicio de uma tarefa |
+| TASK **[Gathering Facts]** | Nome da tarefa (se existir), ou nome do **modulo** |
+| --- | --- |
+| **TASK** [copy] | Demarca o inicio de uma tarefa |
+| TASK **[copy]** | Nome da tarefa (se existir), ou nome do **modulo** |
+| --- | --- | 
+| PLAY RECAP | Demarca o inicio do resumo da execução do playbook
+
+### Mas de onde veio a 'TASK [Gathering Facts]' ?!
+Se olharmos o playbook /anpbits/site.yml vamos encontrar somente 
+um módulo sendo usado, que é o modulo 'copy'
+
+Bom, por padrão o ansible adiciona como o primeiro item da lista de tarefas de um playbook,
+uma chamada ao modulo 'setup' que utiliza de varios métodos para identificar fatos do host
+de destino, como quase tudo no ansible, podemos modificar esse comportamento se quisermos.
+
+Antes de concluirmos essa lição, vamos extrair a versão do sistema de nossos clientes do resultado
+da chamada do módulo setup.
+
+Para isso adicione as seguintes linhas ao arquivo /anpbits/site.yml
+```yaml
+  - debug:
+      msg: "{{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"
+```
+
+Segue o conteúdo final do arquivo para referência
+```yaml
+- hosts: all
+  tasks:
+  - copy:
+      content: "Ansible Rocks!!!\n"
+      dest: /etc/motd
+  - debug:
+      msg: "{{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"
+```
+![alt saida do comando acima](images/l4-site-playbook-output-2.png "Saida do segundo comando")
+
+<br>
 
 # Definições
 
