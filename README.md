@@ -28,6 +28,8 @@
 
 - [Lição 3 - Instalando o python nos nossos alvos](#l3)
 
+- [Lição 4 - Executando nosso primeiro playbook](#l4)
+
 <br>
 <br>
 <br>
@@ -247,7 +249,40 @@ Segue o conteúdo final do arquivo para referência
   - debug:
       msg: "{{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"
 ```
+
+Execute novamente o comando
+```bash
+ansible-playbook site.yml -v -u student -k --become
+# Lembrando que a senha é ==> anpbits
+```
+
 ![alt saida do comando acima](images/l4-site-playbook-output-2.png "Saida do segundo comando")
+
+Olhando a saida da nova execução podemos notar algumas diferenças. Temos agora um novo segmento
+de com a primeira linha igual a "TASK [debug]" que contem uma mensagem para cada um dos nossos hosts.
+
+Nessa mensagem podemos ver que nossos clientes estão rodando sistemas Linux CentOS 8.3
+
+Em breve vamos examinar nosso arquivo site.yml, entender o que cada linha faz e adequar ele 
+as melhores práticas.
+Por hora vamos priorizar entender a saida de tela apresentada pelo ansible.
+
+Vamos focar no segmento "TASK [copy]" e notar o seguinte.
+
+```diff
+TASK [copy] *******************************************************
+- changed: [client-1]
+- changed: [client-2]
++ ok: [client-1]
++ ok: [client-2]
+```
+
+Por que na primeira execução tinhamos a linha iniciada com <span style="color: yellow">"changed:"</span> para cada um dos
+nossos alvos , já na segunda execução temos uma linha iniciada com <span style="color: green">"ok:"</span>
+
+Se executarmos novamente o mesmo playbook, vamos ver que o segmento "TASK [copy]" ira continuar tendo como resultado 
+linhas iniciadas com <span style="color: green">"ok:"</span>
+
 
 <br>
 
