@@ -19,6 +19,21 @@
     curl ${DOCKER_COMPOSE_URL} -o docker-compose.yml && \
     docker-compose up -d
     ```
+## Pré requisitos desejáveis
+
+O ansible é uma ferramenta muito poderosa porem possui uma distinta 
+capacidade de ser 'simples' de entender. Por isso, para tirar o maior 
+proveito possível desse projeto é desejável (porem não obrigatório) que 
+você possua um pouco de conhecimento nos seguintes tópicos:
+
+- docker
+- docker-compose
+- python
+- yaml
+- linux básico
+
+<br>
+<br>
 
 ## Índice
 
@@ -162,7 +177,72 @@ que é usado no ansible para executar comandos no modo privilegiado
 <br>
 <br>
 
-## <a id="l4"></a> Lição 4 - Executando nosso primeiro playbook
+## <a id="l90"></a> Lição 90 - Configurando o ansible e primeiro vault
+Até agora usamos o ansible no chamado modo **adhoc**, e usamos 2 variaveis 
+de ambiente para tornar as respostas um pouco mais amigáveis
+
+Vamos agora explicar essas configurações e coloca-las no seu devido lugar
+antes de avançarmos para trabalhar com playbooks
+
+Crie um novo arquivo conforme abaixo
+
+### */etc/ansible/ansible.cfg*
+```bash
+[defaults]
+# Desabilita a verificação da chave ssh dos servidores remotos 
+# que o ansible tentar se conectar
+# 
+# Para executar o ansible em um cenário de produção é recomendado que 
+# a linha abaixo seja removida
+host_key_checking = False
+
+# Caminho onde o ansible vai procurar um arquivo com a senha
+# de arquivos criptografados com o programa 'ansible-vault'
+vault_password_file = /.ansible_vault
+```
+Agora vamos criar o arquivo que vai conter a senha do nosso vault
+### */.ansible_vault*
+```bash
+echo 'anpbits' > /.ansible_vault
+## Opcional (em laboratório)
+# Para 'garantir' que o arquivo só seja acessível para usuários 
+# administradores do sistema execute o comando abaixo 
+chmod 0400 /.ansible_vault
+```
+
+### Criando no vault
+Alem do comando 'ansible', junto com a instalação temos outras utilidades de linha comando, como o ansible-vault que é usado para criptografar dados 
+sensíveis como nossas credenciais de acesso.
+
+```bash
+ansible-vault create /etc/ansible/credentials.yml
+```
+Após a execução do comando acima, o ansible-vault vai abrir o programa
+[vi/vim](https://www.vim.org) para que você escreva as variáveis que você
+quer proteger usando o formato [yaml](https://yaml.org) (exemplo abaixo).
+
+**Observação:** O editor vim é um pouco diferente do que a maioria das pessoas
+está acostumada.
+De forma bem **simplificada** os comandos que você vai precisar usar estão abaixo
+-
+
+| Comando | resultado |
+| --- | --- |
+i |  ativa o modo de **inserção** no vim, após isso os caracteres que você digitar vão ser inseridos no arquivo
+ESC | sai do modo de **inserção**
+: | ativa o modo de **comandos** no vim
+x (seguido de) ENTER | salva o arquivo que estava sendo editado e fecha o vim
+
+
+Caso você encontre dificuldades com o
+
+
+```yaml
+ansible_ssh_user: student
+ansible_ssh_pass: anpbits
+```
+
+
 
 Até agora executamos comandos 'ansible', que são chamados **comandos adhoc**
 eles são relativamente simples de usar, porem é fácil de ver que para casos complexos o comando ficaria bem difícil de trabalhar.
@@ -174,7 +254,11 @@ o que vem pela frente.
 
 A melhor forma de aproveitar o poder do ansible é usando [playbooks](#playbook)
 
-Um playbook é um arquivo no formato [yaml](https://yaml.org), que especifica o que o ansible deve fazer ao interagir com cada um dos seus alvos
+Um playbook é um arquivo no formato [yaml](https://yaml.org), que especifica o que o ansible deve fazer ao interagir com cada um dos seus alvos.
+Para demonstrar um pouco melhor vamos adicionar um novo 'servidor' a nossa topologia e usar o ansible para instalar e configurar um servidor web
+
+#### Alterando nosso docker-compose
+
 
 ```bash
 ```
@@ -188,3 +272,4 @@ Um playbook é um arquivo no formato [yaml](https://yaml.org), que especifica o 
 #### controller
 #### alvo
 #### playbook
+#### docker & docker-compose
