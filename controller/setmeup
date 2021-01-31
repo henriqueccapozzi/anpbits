@@ -41,7 +41,6 @@ def update_controller_to_lesson(lesson_id: int):
     # Install openssh client
     run_local_command(
         f"ansible localhost -m ansible.builtin.yum -a name=openssh-clients -v")
-    print('Setup summary')
     print_lesson_setup(1)
 
     if lesson_id < 2:
@@ -67,7 +66,12 @@ def update_controller_to_lesson(lesson_id: int):
 
 def main():
     user_arguments = get_user_args()
+
+    print('\n'*2)
+    print('*'*50)
+    print('Setup summary')
     update_controller_to_lesson(user_arguments.lesson)
+    print('\n'*2)
 
 
 if __name__ == "__main__":
