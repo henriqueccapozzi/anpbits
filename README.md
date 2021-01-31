@@ -43,6 +43,8 @@ você possua um pouco de conhecimento nos seguintes tópicos:
 
 - [Lição 3 - Instalando o python nos nossos alvos](#l3)
 
+- [Lição 4 - Executando nosso primeiro playbook](#l4)
+
 <br>
 <br>
 <br>
@@ -50,6 +52,8 @@ você possua um pouco de conhecimento nos seguintes tópicos:
 
 
 ## <a id="l1"></a> Lição 1 - Primeiro comando ansible
+[Voltar para o Índice](#Índice)
+
 O Ansible usa conexões SSH para muitos de seus modulos. Mas nossa maquina que ira rodar o ansible não tem SSH instalado. 
 
 Bom, vamos usar o ansible para nos ajudar com isso
@@ -102,6 +106,7 @@ Agora vamos começar a parte boa
 
 
 ## <a id="l2"></a> Lição 2 - Adicionando nossos primeiros hosts ao inventario
+[Voltar para o Índice](#Índice)
 
 A forma padrão de trabalho do Ansible é de executar ações contra 1 ou mais **alvos**
 Na lição passada usamos **localhost** como o alvo do nosso comando, mas apesar de 
@@ -146,6 +151,7 @@ Nesse comando temos a adição de novos parâmetros de linha de comando
 
 
 ## <a id="l3"></a> Lição 3 - Instalando o python nos nossos alvos
+[Voltar para o Índice](#Índice)
 
 Python é a linguagem nativa do Ansible, e grande parte de sua funcionalidade é através do uso de bibliotecas python.
 Como nossos 'clientes' simulam uma instalação minima de um sistema centos8 (usando containers), somente uma pequena parte do python esta disponível neles.
@@ -177,12 +183,140 @@ que é usado no ansible para executar comandos no modo privilegiado
 <br>
 <br>
 
-## <a id="l90"></a> Lição 90 - Configurando o ansible e primeiro vault
+## <a id="l4"></a>  Lição 4 - Executando nosso primeiro playbook
+[Voltar para o Índice](#Índice)
+
+Até agora executamos comandos 'ansible', que são chamados **comandos adhoc**
+eles são relativamente simples de usar, porem é fácil de ver que para casos complexos o comando ficaria bem difícil de trabalhar.
+
+Os comandos adhoc são geralmente usados para tarefas pontuais, ou para o que fizemos nas lições de 1 a 3, que foi preparar a infra estrutura necessária para
+o que vem pela frente.
+
+### O comando: ansible-playbook
+
+A melhor forma de aproveitar o poder do ansible é usando [playbooks](#playbook)
+
+Um playbook é um arquivo no formato [yaml](https://yaml.org), que especifica o que o ansible deve fazer ao interagir com cada um dos seus alvos.
+
+
+Vamos fazer um playbook para configurar a mensagem de boas vindas quando um usuário fizer login usando ssh
+
+Vamos criar um diretorio para trabalho
+```bash
+mkdir anpbits && cd anpbits
+```
+```yaml
+# Conteudo do arquivo /anpbits/site.yml
+- hosts: all
+  tasks:
+  - copy:
+      content: "Ansible Rocks!!!\n"
+      dest: /etc/motd
+```
+```bash
+# Vamos executar nosso playbook
+ansible-playbook site.yml -v -u student -k --become
+# Lembrando que a senha é ==> anpbits
+```
+
+![alt saida do comando acima](images/l4-site-playbook-output.png "Saida do comando")
+
+Mas espera, se olharmos o resultado da execução podemos ver que temos as seguintes seções:
+
+- PLAY [all]
+- TASK [Gathering Facts]
+- TASK [copy]
+- PLAY RECAP
+
+Seguindo o que fizemos nas lições anteriores, vamos olhar mais de perto cada parte:
+
+| Segmento | Explicação |
+| --- | --- |
+| **PLAY** [all] | Demarca o inicio do playbook
+| PLAY **[all]** | Nome do playbook (se existir), ou nome dos **alvos** 
+| --- | --- |
+| **TASK** [Gathering Facts] | Demarca o inicio de uma tarefa |
+| TASK **[Gathering Facts]** | Nome da tarefa (se existir), ou nome do **modulo** |
+| --- | --- |
+| **TASK** [copy] | Demarca o inicio de uma tarefa |
+| TASK **[copy]** | Nome da tarefa (se existir), ou nome do **modulo** |
+| --- | --- | 
+| PLAY RECAP | Demarca o inicio do resumo da execução do playbook
+
+### Mas de onde veio a 'TASK [Gathering Facts]' ?!
+Se olharmos o playbook /anpbits/site.yml vamos encontrar somente 
+um módulo sendo usado, que é o modulo 'copy'
+
+Bom, por padrão o ansible adiciona como o primeiro item da lista de tarefas de um playbook,
+uma chamada ao modulo 'setup' que utiliza de varios métodos para identificar fatos do host
+de destino, como quase tudo no ansible, podemos modificar esse comportamento se quisermos.
+
+Antes de concluirmos essa lição, vamos extrair a versão do sistema de nossos clientes do resultado
+da chamada do módulo setup.
+
+Para isso adicione as seguintes linhas ao arquivo /anpbits/site.yml
+```yaml
+  - debug:
+      msg: "{{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"
+```
+
+Segue o conteúdo final do arquivo para referência
+```yaml
+- hosts: all
+  tasks:
+  - copy:
+      content: "Ansible Rocks!!!\n"
+      dest: /etc/motd
+  - debug:
+      msg: "{{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"
+```
+
+Execute novamente o comando
+```bash
+ansible-playbook site.yml -v -u student -k --become
+# Lembrando que a senha é ==> anpbits
+```
+
+![alt saida do comando acima](images/l4-site-playbook-output-2.png "Saida do segundo comando")
+
+Olhando a saida da nova execução podemos notar algumas diferenças. Temos agora um novo segmento
+de com a primeira linha igual a "TASK [debug]" que contem uma mensagem para cada um dos nossos hosts.
+
+Nessa mensagem podemos ver que nossos clientes estão rodando sistemas Linux CentOS 8.3
+
+Em breve vamos examinar nosso arquivo site.yml, entender o que cada linha faz e adequar ele 
+as melhores práticas.
+Por hora vamos priorizar entender a saida de tela apresentada pelo ansible.
+
+Vamos focar no segmento "TASK [copy]" e notar o seguinte.
+
+```diff
+TASK [copy] *******************************************************
+- changed: [client-1]
+- changed: [client-2]
++ ok: [client-1]
++ ok: [client-2]
+```
+
+Por que na primeira execução tinhamos a linha iniciada com <span style="color: yellow">"changed:"</span> para cada um dos
+nossos alvos , já na segunda execução temos uma linha iniciada com <span style="color: green">"ok:"</span>
+
+Se executarmos novamente o mesmo playbook, vamos ver que o segmento "TASK [copy]" ira continuar tendo como resultado 
+linhas iniciadas com <span style="color: green">"ok:"</span>
+
+
+<br>
+
+
+
+## <a id="l91"></a> Lição 90 - Configurando o ansible e primeiro vault
 Até agora usamos o ansible no chamado modo **adhoc**, e usamos 2 variaveis 
 de ambiente para tornar as respostas um pouco mais amigáveis
 
 Vamos agora explicar essas configurações e coloca-las no seu devido lugar
 antes de avançarmos para trabalhar com playbooks
+
+
 
 Crie um novo arquivo conforme abaixo
 
@@ -242,28 +376,10 @@ ansible_ssh_user: student
 ansible_ssh_pass: anpbits
 ```
 
-
-
-Até agora executamos comandos 'ansible', que são chamados **comandos adhoc**
-eles são relativamente simples de usar, porem é fácil de ver que para casos complexos o comando ficaria bem difícil de trabalhar.
-
-Os comandos adhoc são geralmente usados para tarefas pontuais, ou para o que fizemos nas lições de 1 a 3, que foi preparar a infra estrutura necessária para
-o que vem pela frente.
-
-### O comando: ansible-playbook
-
-A melhor forma de aproveitar o poder do ansible é usando [playbooks](#playbook)
-
-Um playbook é um arquivo no formato [yaml](https://yaml.org), que especifica o que o ansible deve fazer ao interagir com cada um dos seus alvos.
 Para demonstrar um pouco melhor vamos adicionar um novo 'servidor' a nossa topologia e usar o ansible para instalar e configurar um servidor web
 
 #### Alterando nosso docker-compose
 
-
-```bash
-```
-
-<br>
 
 
 # Definições
