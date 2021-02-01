@@ -1,0 +1,5 @@
+- hosts: all
+  tasks:
+  - copy:
+      content: "Ansible Rocks!!!\n"
+      dest: /etc/motd
