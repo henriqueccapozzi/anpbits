@@ -186,6 +186,8 @@ que é usado no ansible para executar comandos no modo privilegiado
 ## <a id="l4"></a>  Lição 4 - Executando nosso primeiro playbook
 [Voltar para o Índice](#Índice)
 
+*Importante*: caso você esteja começado por essa lição, será necessário executar o script 'setmeup --lesson 4'
+
 Até agora executamos comandos 'ansible', que são chamados **comandos adhoc**
 eles são relativamente simples de usar, porem é fácil de ver que para casos complexos o comando ficaria bem difícil de trabalhar.
 
@@ -201,10 +203,8 @@ Um playbook é um arquivo no formato [yaml](https://yaml.org), que especifica o 
 
 Vamos fazer um playbook para configurar a mensagem de boas vindas quando um usuário fizer login usando ssh
 
-Vamos criar um diretorio para trabalho
-```bash
-mkdir anpbits && cd anpbits
-```
+
+### Arquivo de playbook
 ```yaml
 # Conteudo do arquivo /anpbits/site.yml
 - hosts: all
@@ -215,7 +215,7 @@ mkdir anpbits && cd anpbits
 ```
 ```bash
 # Vamos executar nosso playbook
-ansible-playbook site.yml -v -u student -k --become
+ansible-playbook site.yml -u student -k --become
 # Lembrando que a senha é ==> anpbits
 ```
 
@@ -305,6 +305,14 @@ Se executarmos novamente o mesmo playbook, vamos ver que o segmento "TASK [copy]
 linhas iniciadas com <span style="color: green">"ok:"</span>
 
 
+### Validando nossa configuração
+
+Concluímos nossa primeira execução de um playbook, e nada melhor que 'tirar a prova real' que o que fizemos funcionou como esperavamos.
+
+```
+ssh student@client-1
+```
+![alt validação da configuração](images/l4-validation.png "Saida do comando de validação")
 
 
 <br>
