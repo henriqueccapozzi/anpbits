@@ -5,6 +5,6 @@ RUN \
     yum install --nogpgcheck -y python3 sshpass && \
     pip3 install ansible paramiko
 COPY ./resources /resources
-COPY ./setmeup /setmeup
+ENV PATH="/resources/setup:${PATH}"
 
 WORKDIR /anpbits
