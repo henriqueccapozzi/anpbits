@@ -35,6 +35,30 @@ você possua um pouco de conhecimento nos seguintes tópicos:
 <br>
 <br>
 
+## O script `setmeup`
+
+Bom para facilitar o uso deste projeto a imagem que vamos utilizar
+para o controlador, possui um script chamado `setmeup` para 
+preparar o ambiente até a lição desejada
+
+Logo caso você queira começar de alguma lição que não seja a primeira basta fazer o seguinte:
+
+```bash
+# Exemplo de inicio na lição 4
+setmeup --lesson 4
+```
+
+Fazendo isso todos os passos necessários para iniciar na lição
+escolhida vão ser realizados de forma automatizada
+
+<br>
+
+---
+
+
+
+<br>
+
 ## Índice
 
 - [Lição 1 - Primeiro comando ansible](#l1)
