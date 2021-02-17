@@ -43,7 +43,9 @@ ENGLISH:
 
 def run_local_command(command):
     shell_format_command_list = list(shlex(command, punctuation_chars=True))
-    command_result = subprocess.run(shell_format_command_list, stdout=subprocess.PIPE)
+    command_result = subprocess.run(
+        shell_format_command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
     if command_result.returncode != 0:
         print(command_result)
         raise RuntimeError(f"Unexpected error running the command:\n{command}")
