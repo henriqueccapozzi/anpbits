@@ -69,6 +69,8 @@ escolhida vão ser realizados de forma automatizada
 
 - [Lição 4 - Executando nosso primeiro playbook](#l4)
 
+- [Lição 5 - Configurando o ansible direto no playbook](#l5)
+
 <br>
 <br>
 <br>
@@ -210,15 +212,18 @@ que é usado no ansible para executar comandos no modo privilegiado
 ## <a id="l4"></a>  Lição 4 - Executando nosso primeiro playbook
 [Voltar para o Índice](#Índice)
 
-*Importante*: caso você esteja começado por essa lição, será necessário executar o script 'setmeup --lesson 4'
+*Importante*: caso você esteja começado por essa lição, será necessário executar o script de preparação conforme abaixo
+
+    setmeup --lesson 4
 
 Até agora executamos comandos 'ansible', que são chamados **comandos adhoc**
-eles são relativamente simples de usar, porem é fácil de ver que para casos complexos o comando ficaria bem difícil de trabalhar.
+eles são relativamente simples de usar, porem é fácil de ver que para casos complexos o comando ficaria bem difícil de trabalhar,
+e além disso, comandos adhoc só podem executar 1 modulo por vez.
 
 Os comandos adhoc são geralmente usados para tarefas pontuais, ou para o que fizemos nas lições de 1 a 3, que foi preparar a infra estrutura necessária para
 o que vem pela frente.
 
-### O comando: ansible-playbook
+### O comando: `ansible-playbook`
 
 A melhor forma de aproveitar o poder do ansible é usando [playbooks](#playbook)
 
@@ -341,6 +346,136 @@ ssh student@client-1
 
 <br>
 
+## <a id="l5"></a> Lição 5 - Configurando o ansible direto no playbook
+[Voltar para o Índice](#Índice)
+
+*Importante*: caso você esteja começado por essa lição, será necessário executar o script de preparação conforme abaixo
+
+    setmeup --lesson 5
+
+
+Agora, já fizemos nossas primeiras iterações usando o comando `ansible` que inicia uma execução chamada `adhoc`, usamos também usando o comando `ansible-playbook` que como o nome sugere, executa um `playbook`.
+
+Para ambos os modos de execução do ansible, usamos um `inventario` para 
+definir com quais alvos o ansible deve interagir.
+
+
+Se você está seguindo desde a lição 1 provavelmente já tenha surgido a dúvida
+
+    Como eu faço para não precisar digitar o usuário e senha todas as vezes?
+
+De forma simplificado podemos atingir esse objetivo de 2 maneiras distintas:
+
+1. Salvando nosso usuário e senha em algum lugar e `ensinando` o ansible a usar esses dados salvos
+1. configurando nosso acesso para não precissar de senhas, o que na pratica vai envolver o uso de chaves ssh para conexão 
+
+
+Nesse momento vamos explorar a primeira opção de ensinar o ansible.
+
+A forma que vamos escolher de fazer isso é a seguinte. Vamos
+adicionar ao nosso playbook `site.yml` as seguintes linhas
+```yaml
+# adicionar essas linhas após a linha '- hosts: all'
+  vars:
+    ansible_ssh_user: student
+    ansible_ssh_pass: anpbits
+# --------------------
+# Conteúdo atualizado do arquivo /anpbits/site.yml
+# --------------------
+- hosts: all
+  vars:
+    ansible_ssh_user: student
+    ansible_ssh_pass: anpbits
+  tasks:
+  - name: Ajusta conteudo do /etc/motd
+    copy:
+      content: "Ansible Rocks!!!\n"
+      dest: /etc/motd
+  - debug:
+      msg: "{{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"
+
+```
+<br>
+
+Agora vamos testar nossa nova configuração
+
+```bash
+ansible-playbook site.yml --become
+```
+
+Já que estamos ensinando o ansible a fezer o que queremos, vamos avançar mais uma etapa
+e remover a opção de linha de comando '--become' (que como vimos anteriormente serve para
+que o ansible use elevação de privilégios)
+Para fazer isso basta adicionar a opção 'become: True' na tarefa que precisa de elevação
+de privilégios. 
+
+**OBS: como a opção que estamos adicionando deve alterar o comportamento de um modulo,
+ela deve ficar no mesmo nível de identação que a chamada do módulo 'copy'**
+```yaml
+# --------------------
+# Conteúdo atualizado do arquivo /anpbits/site.yml
+# --------------------
+- hosts: all
+  vars:
+    ansible_ssh_user: student
+    ansible_ssh_pass: anpbits
+  tasks:
+  - name: Ajusta conteudo do /etc/motd
+    copy:
+      content: "Ansible Rocks!!!\n"
+      dest: /etc/motd
+    become: True
+  - debug:
+      msg: "{{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"
+
+```
+
+
+
+### Configurando o ansible usando o arquivo de configuração
+
+Podemos configurar o ansible de várias maneiras, mas as mais comuns são:
+- usando um arquivo de configuração 
+- usando variaveis de ambiente (como fizemos nas lições 2 e 3)
+
+Certamente não vamos explorar todas as configurações possíveis e provavelmente nem mesmo todas as mais comuns.
+Ao invés disso, vamos ver na prática como configurar o ansible
+usando um arquivo de configuração
+
+Ao executar um comando disponibilizado quando instalamos o 
+ansible, ele irá procurar um arquivo de configuração em alguns
+caminhos no sistema, vamos olhar só 2 desses caminhos. 
+Com precedência conforme listados. Os outros locais onde o ansible irá procurar a sua configuração podem ser encontrados na [documentação oficial](https://docs.ansible.com/ansible/latest/reference_appendices/config.html) bem como a ordem completa de 
+prioridades
+
+- arquivo `ansible.cfg` (no diretório atual)
+- arquivo `/etc/ansible/ansible.cfg` 
+
+
+Ou seja, caso o diretório que estamos executando algum comando
+`ansible*` possua um arquivo com o nome `ansible.cfg`, esse 
+arquivo será usado, caso contrário o ansible vai procurar no 
+caminho padrão `/etc/ansible/ansible.cfg` 
+
+Mas vamos logo colocar a mão na massa...
+
+Comece criando o arquivo `/anpbits/ansible.cfg` com o conteúdo
+abaixo:
+
+```properties
+# Conteúdo do arquivo /anpbits/ansible.cfg
+[defaults]
+ansible_ssh_user = student
+ansible_ssh_pass = anpbits
+```
+
+<br>
+
+
+
+<br>
+<br>
+<br>
 
 ## <a id="l91"></a> Lição 90 - Configurando o ansible e primeiro vault
 Até agora usamos o ansible no chamado modo **adhoc**, e usamos 2 variaveis 

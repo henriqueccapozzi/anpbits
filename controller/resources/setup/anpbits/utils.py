@@ -35,7 +35,7 @@ ENGLISH:
         description=script_description, formatter_class=argparse.RawTextHelpFormatter
     )
     # TODO parse the README.md for available lessons
-    parser.add_argument("-l", "--lesson", type=int, choices=range(2, 5))
+    parser.add_argument("-l", "--lesson", type=int, choices=range(2, 6))
 
     args = parser.parse_args()
     return args

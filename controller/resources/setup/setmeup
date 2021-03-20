@@ -44,6 +44,8 @@ def update_controller_to_lesson(lesson_id: int):
         "ansible-playbook resources/playbooks/update_motd.yml -u student -e ansible_ssh_password=anpbits --become"
     )
     print_lesson_setup(4)
+    if lesson_id <= 5:
+        return None
 
 
 def main():
