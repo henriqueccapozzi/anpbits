@@ -379,22 +379,8 @@ adicionar ao nosso playbook `site.yml` as seguintes linhas
   vars:
     ansible_ssh_user: student
     ansible_ssh_pass: anpbits
-# --------------------
-# Conteúdo atualizado do arquivo /anpbits/site.yml
-# --------------------
-- hosts: all
-  vars:
-    ansible_ssh_user: student
-    ansible_ssh_pass: anpbits
-  tasks:
-  - name: Ajusta conteudo do /etc/motd
-    copy:
-      content: "Ansible Rocks!!!\n"
-      dest: /etc/motd
-  - debug:
-      msg: "{{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"
-
 ```
+Caso fique alguma dúvida, o arquivo `site.yml` está disponível no final dessa lição
 <br>
 
 Agora vamos testar nossa nova configuração
@@ -414,6 +400,7 @@ ela deve ficar no mesmo nível de identação que a chamada do módulo 'copy'**
 ```yaml
 # --------------------
 # Conteúdo atualizado do arquivo /anpbits/site.yml
+# Após concluir a lição 5
 # --------------------
 - hosts: all
   vars:
