@@ -416,7 +416,16 @@ ela deve ficar no mesmo nível de identação que a chamada do módulo 'copy'**
       msg: "{{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"
 
 ```
+<br>
 
+## <a id="l6"></a> Lição 6 - Configurando o ansible usando um arquivo de configuração.
+
+[Voltar para o Índice](#Índice)
+
+
+*Importante*: caso você esteja começado por essa lição, será necessário executar o script de preparação conforme abaixo
+
+    setmeup --lesson 6
 
 
 ### Configurando o ansible usando o arquivo de configuração
@@ -431,35 +440,109 @@ usando um arquivo de configuração
 
 Ao executar um comando disponibilizado quando instalamos o 
 ansible, ele irá procurar um arquivo de configuração em alguns
-caminhos no sistema, vamos olhar só 2 desses caminhos. 
-Com precedência conforme listados. Os outros locais onde o ansible irá procurar a sua configuração podem ser encontrados na [documentação oficial](https://docs.ansible.com/ansible/latest/reference_appendices/config.html) bem como a ordem completa de 
+caminhos no sistema, vamos olhar só 2 desses caminhos, que são os que tem as maiores precedência.
+
+Os outros locais onde o ansible irá procurar a sua configuração podem ser encontrados na [documentação oficial](https://docs.ansible.com/ansible/latest/reference_appendices/config.html) bem como a ordem completa de 
 prioridades
 
+- caminho especificado na variável de ambiente `ANSIBLE_CONFIG` 
 - arquivo `ansible.cfg` (no diretório atual)
-- arquivo `/etc/ansible/ansible.cfg` 
 
+Ou seja, caso a variável de ambiente `ANSIBLE_CONFIG` aponte para
+um caminho existente no sistema o ansible vai tentar usar esse 
+arquivo. 
 
-Ou seja, caso o diretório que estamos executando algum comando
-`ansible*` possua um arquivo com o nome `ansible.cfg`, esse 
-arquivo será usado, caso contrário o ansible vai procurar no 
-caminho padrão `/etc/ansible/ansible.cfg` 
+Um detalhe importante é que se o arquivo de destino
+não for válido, erros de estrutura como o abaixo **vão fazer com o
+que o ansible não consiga iniciar!**
+Porem para conseguir essa proeza não é tão fácil assim, é necessário que o arquivo não tenha nenhuma linha de cabeçalho de seção ou possua alguma linha de opção sem o caractere '='.
 
-Mas vamos logo colocar a mão na massa...
+### Exemplos de arquivos `INVALIDOS`
 
-Comece criando o arquivo `/anpbits/ansible.cfg` com o conteúdo
-abaixo:
-
-```properties
-# Conteúdo do arquivo /anpbits/ansible.cfg
+```ini
+ansible_user = fulano
+```
+```ini
+#[defaults]
+ansible_user = fulano
+```
+```ini
 [defaults]
-ansible_ssh_user = student
-ansible_ssh_pass = anpbits
+ansible_user
+```
+Feito esse aviso, vamos olhar para  um arquivo válidos e 
+configurar o ansible com ele.
+
+primeiramente vamos remover algumas das linhas de configuração
+que adicionamos na lição 5.
+
+```yaml
+# remover as linhas abaixo do arquivo /anpbits/site.yml
+  vars:
+    ansible_ssh_user: student
+  ...
+    become: True
 ```
 
+Apos isso vamos alterar o conteúdo que o ansible vai configurar
+no arquivo `/etc/motd`. Para fazer isso edite a linha conforme abaixo
+
+```diff
+-      content: "Ansible Rocks!!!\n"
+
++      content: "Este host é gerenciado pelo Ansible.\n"
+```
+
+Para referência o arquivo deve ficar assim.
+```yaml
+- hosts: all
+  vars:
+    ansible_ssh_pass: anpbits
+  tasks:
+  - name: Ajusta conteudo do /etc/motd
+    copy:
+      content: "Este host é gerenciado pelo Ansible.\n"
+      dest: /etc/motd
+  - debug:
+      msg: "{{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"
+```
+
+Se tentarmos executar nosso playbook agora (sem passar nenhuma opção na linha comando)
+vamos ver a execução vai resultar em falha.
+
+![alt falha ao executar o playbook](images/l6-site-playbook-error.png "Saida de comando mostrando falha na execução")
+
+Isso ocorre por que ao retirar as configurações do playbook o ansible
+não sabe mais quais os parâmetros usar para estabelecer a conexão
+
+Vamos corrigir escrevendo o seguinte arquivo
+```ini
+# Conteúdo do arquivo /anpbits/ansible.cfg
+[defaults]
+remote_user = student
+
+[privilege_escalation]
+become = True
+```
+
+Após realizar essa configuração o nosso playbook vai passar
+a executar com sucesso, e se realizarmos uma conexão para
+um dos nossos clientes, vamos visualizar a mensagem atualizada
+  
+  `Este host é gerenciado pelo Ansible.`
+
+*Por razões de segurança não podemos configurar a senha para 
+conexão ssh no arquivo de configurações. Mas vamos ver mais a
+frente formas seguras de armazenar senhas e dados sensíveis*
+
+
 <br>
-
-
-
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
 <br>
 <br>
 <br>

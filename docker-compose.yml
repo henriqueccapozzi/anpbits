@@ -10,6 +10,6 @@ services:
 
   controller:
     hostname: controller
-    image: henriqueccapozzi/anpbits:controller-1.0.2
+    image: henriqueccapozzi/anpbits:controller-1.0.3
     command: tail -f /dev/null
     
