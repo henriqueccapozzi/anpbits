@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import os
+import shutil
 
 from anpbits.utils import get_user_args, run_local_command, print_lesson_setup
 
@@ -41,21 +42,32 @@ def update_controller_to_lesson(lesson_id: int):
 
     # Change the content of /etc/motd
     run_local_command(
-        "ansible-playbook resources/playbooks/update_motd.yml -u student -e ansible_ssh_password=anpbits --become"
+        "ansible-playbook /resources/playbooks/update_motd.yml -u student -e ansible_ssh_password=anpbits --become"
     )
-    print_lesson_setup(4)
+    print_lesson_setup(4.1)
+    shutil.copy("/resources/playbooks/l5.site.yml", "/anpbits/site.yml")
+    print_lesson_setup(4.2)
+
     if lesson_id <= 5:
+        return None
+
+    print_lesson_setup(5)
+    shutil.copy("/resources/playbooks/l6.site.yml", "/anpbits/site.yml")
+
+    if lesson_id <= 6:
         return None
 
 
 def main():
     user_arguments = get_user_args()
-
-    print("\n" * 1)
-    print("*" * 50)
-    print("Setup summary")
+    print("\033c", end="")
+    print("*" * 55)
+    print("Seting up things for lesson", user_arguments.lesson)
+    print("*" * 55)
+    print("Setup summary ")
     update_controller_to_lesson(user_arguments.lesson)
-    print("\n" * 2)
+    print("*" * 55)
+    print("\n" * 1)
 
 
 if __name__ == "__main__":

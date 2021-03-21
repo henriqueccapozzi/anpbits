@@ -9,7 +9,9 @@ def print_lesson_setup(lesson_id: int):
         1: "openssh-clients installed on controller",
         2: "inventory file created",
         3: "python3 installed on clients",
-        4: "updated the content of /etc/motd",
+        4.1: "updated the content of /etc/motd",
+        4.2: "created /anpbits/site.yml file",
+        5: "updated the /anpbits/site.yml file",
     }
     print(
         "{:40} --- {:6}".format(
@@ -35,7 +37,7 @@ ENGLISH:
         description=script_description, formatter_class=argparse.RawTextHelpFormatter
     )
     # TODO parse the README.md for available lessons
-    parser.add_argument("-l", "--lesson", type=int, choices=range(2, 6))
+    parser.add_argument("-l", "--lesson", required=True, type=int, choices=range(2, 7))
 
     args = parser.parse_args()
     return args

@@ -1,0 +1,7 @@
+- hosts: all
+  tasks:
+  - copy:
+      content: "Ansible Rocks!!!\n"
+      dest: /etc/motd
+  - debug:
+      msg: "{{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"

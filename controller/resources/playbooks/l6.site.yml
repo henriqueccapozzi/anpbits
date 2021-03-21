@@ -1,0 +1,12 @@
+- hosts: all
+  vars:
+    ansible_ssh_user: student
+    ansible_ssh_pass: anpbits
+  tasks:
+  - name: Ajusta conteudo do /etc/motd
+    copy:
+      content: "Ansible Rocks!!!\n"
+      dest: /etc/motd
+    become: True
+  - debug:
+      msg: "{{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"
