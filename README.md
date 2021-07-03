@@ -71,6 +71,10 @@ escolhida vão ser realizados de forma automatizada
 
 - [Lição 5 - Configurando o ansible direto no playbook](#l5)
 
+- [Lição 6 - Configurando o ansible usando um arquivo de configuração](#l6)
+
+- [Lição 7 - Utilizando o ansible-vault para guardar informações secretas](#l7)
+
 <br>
 <br>
 <br>
@@ -532,10 +536,110 @@ um dos nossos clientes, vamos visualizar a mensagem atualizada
   `Este host é gerenciado pelo Ansible.`
 
 *Por razões de segurança não podemos configurar a senha para 
-conexão ssh no arquivo de configurações. Mas vamos ver mais a
-frente formas seguras de armazenar senhas e dados sensíveis*
+conexão ssh no arquivo de configurações. Mas vamos ver na próxima
+lição como utilizar em seus playbooks senhas e dados sensíveis
+sem comprometer a segurança*
+
+<br>
+
+## <a id="l7"></a> Utilizando o ansible-vault para guardar informações secretas
+
+Nas lições anteriormes deixamos a senha do nosso usuário `student`
+em claro no nosso arquivo _/anpbits/site.yml_
+e ainda não vamos resolver isso agora já iriamos acabar
+mudando muitas coisas de uma só vez. E como já vimos 
+anteriormente é possível passar a senha do usuário usado na
+conexão ssh de forma segura utilizando a opção de linha de comando **`-k`**
+
+Vamos seguir como estamos e utilizar o ansible para configurar
+um novo usuário nos nossos clientes e configurar o acesso utilizando
+chaves ssh que é uma forma muito mais prática e segura de fazer
+conexões de rede 
+
+O ansible-vault é um utilitario de criptografia que vem junto
+com a instalação do ansible e é de fácil utilização. Mais detalhes
+sobre ele podem ser encontrados na [documentação oficial](https://docs.ansible.com/ansible/latest/user_guide/vault.html)
 
 
+Para criar nosso primeiro vault execute o comando a seguir em um
+terminal no controller:
+
+```bash
+$ ansible-vault create my-vault.yml
+New Vault password: # anpbits
+Confirm New Vault password: #anpbits
+```
+
+Após isso você sera direcionado para o editor **_vi_**. Se você nunca usou o
+**_vi_** antes seguem 2 dicas importantes
+
+### Dica 1 - Inserindo e editando textos
+Ao entrar no **_vi_** estamos por padrão no modo **comando**
+para entrar no modo **input** é necessário pressionar uma das teclas
+abaixo:
+- i
+- a
+- o
+
+### Dica 2 - Salvar e sair (ou só sair)
+Para 'sair' do **_vi_** precisamos ir para o modo **extended** que **SÓ**
+conseguimos chegar partindo do modo **comando**.
+
+Conseguentemente se estamos escrevendo alguma coisa no modo **input**
+precisamos _voltar_ para o modo **comando** antes de conseguir alguma 
+coisa.
+Para fazer isso basta pressionar a tecla 
+
+**ESC**
+
+Uma vez no modo de **comando** digite o caractere _:_ (dois pontos) 
+seguidos das combinações abaixo conforme o que deseja fazer:
+
+- q! (sair sem salvar)
+- wq (salvar e sair)
+
+Exitem MUITAS outras opções, comandos e funcionalidades no **_vi_**.
+Mas isso está alem do escopo que estamos estudando.
+
+
+Feitas as configurações sobre o editor de textos vamos voltar ao vault
+
+Uma vez digitado o comando `ansible-vault create my-vault.yml` 
+vocẽ vai se encontrar em um arquivo vazio dentro do editor **_vi_**
+
+Neste arquivo coloque o seguinte conteúdo:
+
+```yaml
+devops_password: anpbits
+```
+
+e vamos utilizar o ansible para criar um novo usuário nos nossos clientes
+para isso vamos utilizar o modulo: `user`
+
+crie o arquivo /anpbits/users.yml e coloque o seguinte conteúdo
+
+```yaml
+- hosts: all
+  vars:
+    ansible_ssh_pass: anpbits
+  vars_files:
+    - my-vault.yml
+  tasks:
+  - name: Cria o usuário devops
+    user:
+      name: devops
+      password: "{{ devops_password | password_hash('sha512','salt') }}"
+```
+
+_OBS: No playbook acima fazemos o uso do **filtro** **`password_hash`** para transformar a senha do nosso usuário em uma string criptografada. Vamos discutir filtros mais a frente mas por hora vamos deixar assim já que para obter o mesmo resultado teriamos que deixar o valor de password igual a linha abaixo_
+
+    $6$salt$svhGhpj6jYUXJ8/9TZhwz8iVm0k/Qvj/FICon0/SwIvEX2GA0CwvnJkn4nE1S9HBMVS1SrYhDYkLTsnzuQbtf1
+
+
+Em um host de produção pode ser dejado que o usuário que estamos criando não possa fazer login com senha. Neste caso basta remover o argumento 'password' da definição do modulo `user`
+
+
+
 <br>
 <br>
 <br>
@@ -545,7 +649,10 @@ frente formas seguras de armazenar senhas e dados sensíveis*
 <br>
 <br>
 <br>
-<br>
+
+## <a id="l8"></a> Configurando o acesso SSH sem senhas
+
+
 
 ## <a id="l91"></a> Lição 90 - Configurando o ansible e primeiro vault
 Até agora usamos o ansible no chamado modo **adhoc**, e usamos 2 variaveis 
